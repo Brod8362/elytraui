@@ -104,10 +104,19 @@ class ElytraGUIRenderer {
     drawRightFacingArrow(leftS, groundPos, renderColor,3)
 
     val altPos = barB + (calculateAltitudePos(mc.player.getPosY) * (barT - barB)).toInt
-    drawRightFacingArrow(leftS, altPos, arrowColor)
+    if (mc.player.getPosY>255) {
+      //draw small arrow at top indicating out of world
+      drawRightFacingArrow(leftS+1, barB, arrowColor, 3)
+    } else {
+      drawRightFacingArrow(leftS+1, altPos, arrowColor)
+    }
 
     val velPos = barB + (calculateVelocityPos(velocity) * (barT-barB)).toInt
-    drawLeftFacingArrow(rightS+1, velPos, arrowColor)
+    if (velocity > 60) {
+      drawLeftFacingArrow(rightS+2, barB, arrowColor, 3)
+    } else {
+      drawLeftFacingArrow(rightS+2, velPos, arrowColor)
+    }
   }
 
   /*
