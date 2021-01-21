@@ -1,5 +1,6 @@
 package pw.byakuren.elytraui
 
+import com.mojang.blaze3d.matrix.MatrixStack
 import net.minecraft.client.Minecraft
 import net.minecraft.client.entity.player.ClientPlayerEntity
 import net.minecraft.client.gui.{AbstractGui, FontRenderer}
@@ -12,6 +13,7 @@ import java.awt.Color
 class ElytraGUIRenderer {
 
   private val renderColor: Int = Color.ORANGE.getRGB
+  private val arrowColor: Int = Color.RED.getRGB
   private val LOGGER: Logger = LogManager.getLogger
 
   private val mc: Minecraft = Minecraft.getInstance()
@@ -47,8 +49,12 @@ class ElytraGUIRenderer {
     val rightS = (width / 2) + (width * lineXOffset).toInt
     val barB = (height / 2) - (width * 0.10).toInt
     val barT = (height / 2) + (width * 0.10).toInt
+    //Render left bar
     AbstractGui.fill(mStack, leftS, barB, leftS + lineThickness, barT, renderColor)
+    //Render right bar
     AbstractGui.fill(mStack, rightS, barB, rightS + lineThickness, barT, renderColor)
+
+    AbstractGui.drawCenteredString(mStack, fR, "ALT", leftS, (barT+textLineOffset).toInt, renderColor)
 
     val reticleStr = pitch match {
       case x if x > pitchMax => "^"
@@ -61,6 +67,13 @@ class ElytraGUIRenderer {
     reticlePos = math.min(reticlePos, barT)
 
     AbstractGui.drawCenteredString(mStack, fR, reticleStr, width / 2, reticlePos-5, renderColor)
+
+
+    val groundPos = barB+(calculateAltitudePos(54)*(barT-barB)).toInt
+    drawRightFacingArrow(mStack, leftS-1, groundPos, renderColor)
+
+    val altPos = barB+(calculateAltitudePos(mc.player.getPosY)*(barT-barB)).toInt
+    drawRightFacingArrow(mStack, leftS-1, altPos, arrowColor)
 
   }
 
@@ -85,7 +98,18 @@ class ElytraGUIRenderer {
     1 - ((value-min)/(max-min))
   }
 
-  private def calculateGroundPos(pitch: Double): Double = {
+  private def calculateGroundMarkerPos(pitch: Double): Double = {
     normalize(-90, 90, pitch)
+  }
+
+  private def calculateAltitudePos(y:Double): Double = {
+    normalize(0, 256, y)
+  }
+
+  private def drawRightFacingArrow(mStack: MatrixStack, x: Int, y: Int, color: Int): Unit = {
+    //conveniently controls both x and y
+    for (offset <- 0 to 5) {
+      AbstractGui.fill(mStack, x-offset, y-offset, x-offset-1, y+offset, color)
+    }
   }
 }
