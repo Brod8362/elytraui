@@ -25,9 +25,17 @@ class ElytraGUIRenderer {
   private val pitchMax = 10
   private val pitchMin = -10
 
+  private var flightTime = 0
+
   @SubscribeEvent
   def renderHUD(event: RenderGameOverlayEvent.Post): Unit = {
-    if (!mc.player.isElytraFlying) return
+    if (!mc.player.isElytraFlying) {
+      flightTime=0
+      return
+    }
+    flightTime+=1
+    if (flightTime < 40) return //only show after 2 seconds
+
     val fR: FontRenderer = mc.fontRenderer
     implicit val mStack: MatrixStack = event.getMatrixStack
     val mainWindow = event.getWindow
@@ -76,12 +84,8 @@ class ElytraGUIRenderer {
     //Draw vel text under right bar
     AbstractGui.drawCenteredString(mStack, fR, "VEL", rightS, (barT + textLineOffset).toInt+1, renderColor)
 
-    val reticleStr = pitch match {
-      case x if x > pitchMax => "^"
-      case x if x < pitchMin => "v"
-      case _ => "o"
-    }
 
+    val reticleOffset = width*0.015
     var reticlePos = barB + (calculateReticlePos(pitch) * (barT - barB)).toInt
     reticlePos = math.max(barB, reticlePos)
     reticlePos = math.min(reticlePos, barT)
@@ -90,16 +94,17 @@ class ElytraGUIRenderer {
       case x if x < 0.5 && x > -0.5 => goodColor
       case _ => renderColor
     }
-
-    AbstractGui.drawCenteredString(mStack, fR, reticleStr, width / 2, reticlePos - 5, reticleColor)
+    //draw reticle
+    drawRightFacingArrow((width/2)-reticleOffset.toInt, reticlePos, reticleColor, 3)
+    drawLeftFacingArrow((width/2)+reticleOffset.toInt-1, reticlePos, reticleColor, 3)
 
     //Draw height arrow for alt
     val highest = highestBlockAtLocation(mc.player.world, mc.player.getPosX.toInt, mc.player.getPosZ.toInt)
     val groundPos = barB + (calculateAltitudePos(highest) * (barT - barB)).toInt
-    drawRightFacingArrow(leftS - 1, groundPos, renderColor)
+    drawRightFacingArrow(leftS, groundPos, renderColor,3)
 
     val altPos = barB + (calculateAltitudePos(mc.player.getPosY) * (barT - barB)).toInt
-    drawRightFacingArrow(leftS - 1, altPos, arrowColor)
+    drawRightFacingArrow(leftS, altPos, arrowColor)
 
     val velPos = barB + (calculateVelocityPos(velocity) * (barT-barB)).toInt
     drawLeftFacingArrow(rightS+1, velPos, arrowColor)
@@ -137,15 +142,15 @@ class ElytraGUIRenderer {
     normalize(0, 60, vel)
   }
 
-  private def drawRightFacingArrow(x: Int, y: Int, color: Int)(implicit mStack: MatrixStack): Unit = {
+  private def drawRightFacingArrow(x: Int, y: Int, color: Int, size: Int = 5)(implicit mStack: MatrixStack): Unit = {
     //conveniently controls both x and y
-    for (offset <- 0 to 5) {
+    for (offset <- 0 to size) {
       AbstractGui.fill(mStack, x - offset, y - offset, x - offset - 1, y + offset, color)
     }
   }
 
-  private def drawLeftFacingArrow(x: Int, y: Int, color: Int)(implicit mStack: MatrixStack): Unit = {
-    for (offset <- 0 to 5) {
+  private def drawLeftFacingArrow(x: Int, y: Int, color: Int, size: Int = 5)(implicit mStack: MatrixStack): Unit = {
+    for (offset <- 0 to size) {
       AbstractGui.fill(mStack, x + offset, y - offset, x + offset + 1, y + offset, color)
     }
   }
