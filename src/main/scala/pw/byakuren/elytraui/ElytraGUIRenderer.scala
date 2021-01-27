@@ -40,7 +40,7 @@ class ElytraGUIRenderer {
     implicit val mStack: MatrixStack = event.getMatrixStack
     val mainWindow = event.getWindow
 
-    val effectiveGuiScale = math.max(1, mc.gameSettings.guiScale)
+    val effectiveGuiScale = math.max(1, mc.gameSettings.guiScale) //todo get actual effective gui scale
     val width = mainWindow.getWidth / effectiveGuiScale
     val height = mainWindow.getHeight / effectiveGuiScale
 

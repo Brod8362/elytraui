@@ -10,13 +10,19 @@ buildscript {
 }
 plugins {
     id 'scala'
+    id "com.github.johnrengelman.shadow" version "4.0.4"
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 
+dependencies {
+    implementation "org.scala-lang:scala-library:2.13.1"
+}
+
 sourceCompatibility = 1.11
 targetCompatibility = 1.11
+
 
 version = '1.0'
 group = 'pw.byakuren.elytraui' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
